@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.POC">
         <activity
+            android:name=".CobaActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

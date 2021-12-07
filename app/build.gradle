@@ -7,7 +7,7 @@ android {
     compileSdk 30
 
     defaultConfig {
-        applicationId "com.example.poc"
+        applicationId "com.example.poc.py"
         minSdk 24
         targetSdk 30
         versionCode 1
@@ -33,6 +33,7 @@ android {
             pip {
                 install "numpy"
                 install "opencv-python"
+                install "pillow"
             }
         }
 

@@ -5,6 +5,7 @@ import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     String img2String = "";
 
     ActivityMainBinding binding;
+    Python python;
     Bitmap bitmap;
     BitmapDrawable drawable;
 
@@ -61,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
                 binding.tvNilaiPoc.setText(getPOCValue());
             }
         });
-
     }
 
     void imageChooser1() {
@@ -84,19 +85,19 @@ public class MainActivity extends AppCompatActivity {
             Uri selectedImageUri = data.getData();
             if (requestCode == SELECT_PICTURE1) {
                 if (null != selectedImageUri) {
-                    binding.imgSelected.setImageURI(selectedImageUri);
-                    drawable = (BitmapDrawable) binding.imgSelected.getDrawable();
+                    binding.imgSelected1.setImageURI(selectedImageUri);
+                    drawable = (BitmapDrawable) binding.imgSelected1.getDrawable();
                     bitmap = drawable.getBitmap();
                     img1String = getStringImage(bitmap);
-                    Log.i("imgString 1", img1String);
+                    binding.imgSelected1.setImageBitmap(imgSetter(img1String));
                 }
-            }else if (requestCode == SELECT_PICTURE2)  {
+            } else if (requestCode == SELECT_PICTURE2) {
                 if (null != selectedImageUri) {
-                    binding.imgSelected.setImageURI(selectedImageUri);
-                    drawable = (BitmapDrawable) binding.imgSelected.getDrawable();
+                    binding.imgSelected2.setImageURI(selectedImageUri);
+                    drawable = (BitmapDrawable) binding.imgSelected2.getDrawable();
                     bitmap = drawable.getBitmap();
                     img2String = getStringImage(bitmap);
-                    Log.i("imgString 2", img2String);
+                    binding.imgSelected2.setImageBitmap(imgSetter(img2String));
                 }
             }
         }
@@ -113,17 +114,27 @@ public class MainActivity extends AppCompatActivity {
     private void initPython() {
         if (!Python.isStarted()) {
             Python.start(new AndroidPlatform(this));
+            python = Python.getInstance();
         }
     }
 
     private String getPOCValue() {
-        Python python = Python.getInstance();
-        PyObject pythonFile = python.getModule("poc");
+        PyObject pyo = python.getModule("poc");
+
         if (img1String.equals(img2String)) {
             Toast.makeText(this, "Gambar sama", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Gambar tidak sama", Toast.LENGTH_SHORT).show();
         }
-        return pythonFile.callAttr("nilaiPOC", img1String + ',' + img2String).toString();
+
+        return pyo.callAttr("nilaiPOC", img1String + ',' + img2String).toString();
+    }
+
+    private Bitmap imgSetter(String img) {
+        PyObject pyo = python.getModule("preprocessing");
+        String str = pyo.callAttr("process", img).toString();
+        byte data[] = android.util.Base64.decode(str, Base64.DEFAULT);
+        Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+        return bmp;
     }
 }
